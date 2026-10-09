@@ -6,6 +6,10 @@ up to 16 transparent layers (people, objects, text, decorations). The app then
 shows those layers on an interactive canvas where each detected object can be
 selected, dragged, resized, re-ordered, hidden, and exported.
 
+![Upload a photo and choose Pro or Flash](docs/screenshots/before-upload.png)
+
+![Detected objects become selectable layers](docs/screenshots/layers.png)
+
 ## Prerequisites
 
 - Node.js 20 or newer
@@ -55,19 +59,9 @@ selected, dragged, resized, re-ordered, hidden, and exported.
 
 ## How it works
 
-```
-Browser  --(image as base64 + pro/flash)-->  /api/decompose (Next.js route)
-                                                   |  Bearer ARK_API_KEY
-                                                   |  layer_decomposition: true
-                                                   v
-                                       Seedream 5.0 image API
-                                                   |
-                                        base + layers as b64_json
-                                                   v
-Browser  <--  { base, layers[{ name, bbox, zIndex, dataUrl }] }  --
-```
+![Browser sends the photo to a Next.js route, which calls Seedream and returns layers to the canvas](docs/assets/architecture.png)
 
-- The API key lives only on the server (`.env.local` is git-ignored).
+- The API key lives only on the server.
 - The browser never sends a raw model ID, only `"pro"` or `"flash"`; the
   server maps that to the IDs configured in `.env.local`.
 - Images come back as base64 so the browser can render them without hitting
@@ -84,11 +78,3 @@ Browser  <--  { base, layers[{ name, bbox, zIndex, dataUrl }] }  --
 - `components/UploadPanel.tsx` - file picker, model toggle, prompt, run button
 - `components/LayerEditor.tsx` - the react-konva canvas
 - `components/LayerList.tsx` - side panel with layer controls
-
-## Notes for later
-
-- **Login**: not included yet. A `proxy.ts` / middleware credential gate with
-  a session cookie can be added without changing the current structure.
-- **Deployment**: the Seedream call takes 1 to 2 minutes, which is longer than
-  the default timeout on most serverless hosts. Deploy to a long-running Node
-  host, or move to an async job pattern, before opening this up to customers.
